@@ -21,7 +21,8 @@
    - Wait for the project to sync and build.  
 
 3. **Run the App**  
-   - Connect an emulator or physical device.  
+   - Connect an emulator or physical device.
+   - Run the project from 'main' branch
    - Click on the **Run** button ▶️ to launch the app.  
 
 ## Project Architecture
