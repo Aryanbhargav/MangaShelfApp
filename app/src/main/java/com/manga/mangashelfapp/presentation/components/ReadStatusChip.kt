@@ -18,6 +18,8 @@ import com.manga.mangashelfapp.ui.viewmodel.MangaViewModel
 
 @Composable
 fun ReadStatusChip(mangaListing: MangaListing, mangaViewModel: MangaViewModel) {
+    val readStatus=mangaListing.isRead
+    val selectedRead=mangaViewModel.selectedRead
     Box(
         modifier = Modifier
             .padding(4.dp)
@@ -31,7 +33,12 @@ fun ReadStatusChip(mangaListing: MangaListing, mangaViewModel: MangaViewModel) {
                 shape = RoundedCornerShape(16.dp)
             )
             .padding(horizontal = 12.dp, vertical = 6.dp)
+
             .clickable {
+                if(readStatus)
+                {
+                    selectedRead.add(mangaListing.category)
+                }
                 mangaViewModel.toggleRead(mangaListing)
             }
     ) {

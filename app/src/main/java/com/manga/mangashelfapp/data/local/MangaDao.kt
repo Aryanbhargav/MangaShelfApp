@@ -1,5 +1,6 @@
 package com.manga.mangashelfapp.data.local
 
+import android.media.MediaRouter.RouteCategory
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -31,4 +32,7 @@ interface MangaDao {
 
     @Query("SELECT * FROM mangalistingentity WHERE isFavourite = 1")
     suspend fun getFavoriteMangas(): List<MangaListingEntity>
+
+    @Query("SELECT * FROM mangalistingentity WHERE category= :category  AND isRead= 0 ORDER BY popularity desc, score DESC")
+    suspend fun getRecommendedManga(category: String):List<MangaListingEntity>
 }

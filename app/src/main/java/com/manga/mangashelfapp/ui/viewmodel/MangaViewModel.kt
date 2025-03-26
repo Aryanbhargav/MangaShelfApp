@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.manga.mangashelfapp.data.repository.MangaRepositoryImpl
 import com.manga.mangashelfapp.domain.model.MangaListing
 import com.manga.mangashelfapp.domain.repository.MangaRepository
 import com.manga.mangashelfapp.util.Resource
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class MangaViewModel @Inject constructor(var mangaRepository : MangaRepository)  : ViewModel(){
+class MangaViewModel @Inject constructor(var mangaRepository : MangaRepositoryImpl)  : ViewModel(){
 
     val showSortingOptions = mutableStateOf(false)
     var state by mutableStateOf(MangaListingState())
@@ -27,8 +28,13 @@ class MangaViewModel @Inject constructor(var mangaRepository : MangaRepository) 
     private val _favoriteMangaList = MutableStateFlow<List<MangaListing>>(emptyList())
     val favoriteMangaList: StateFlow<List<MangaListing>> get() = _favoriteMangaList
 
+    val selectedRead= mutableSetOf<String>()
+
     private val _singleMangaListing = MutableStateFlow<MangaListing?>((null))
     val singleMangaListing: StateFlow<MangaListing?> get() = _singleMangaListing
+
+    private val _recommendedManga=MutableStateFlow<List<MangaListing>>(emptyList())
+    val recommendedManga:StateFlow<List<MangaListing>> get()=_recommendedManga
 
     var sortingOption =  mutableStateOf<SortingOption>(SortingOption.YEAR)
     init {
@@ -40,6 +46,19 @@ class MangaViewModel @Inject constructor(var mangaRepository : MangaRepository) 
         _singleMangaListing.value=manga
     }
 
+    fun getRecommendedList(manga:List<MangaListing>, category:String):List<MangaListing>{
+
+        return manga.filter { it.category==category }
+
+    }
+
+    fun getRecommendedList(category: String)
+    {
+        viewModelScope.launch {
+            _recommendedManga.value=mangaRepository.getRecommendedManga(category)
+
+        }
+    }
     fun getMangaList( fetchFromRemote: Boolean = false){
         viewModelScope.launch {
             mangaRepository.getMangaListing(fetchFromRemote)
@@ -102,4 +121,5 @@ class MangaViewModel @Inject constructor(var mangaRepository : MangaRepository) 
             )
         }
     }
+
 }

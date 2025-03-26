@@ -82,4 +82,8 @@ class MangaRepositoryImpl @Inject constructor(
         dao.updateReadStatus(manga.id, manga.isRead)
     }
 
+    override suspend fun getRecommendedManga(category: String): List<MangaListing> {
+       return dao.getRecommendedManga(category).map { it.toMangaListing() }
+    }
+
 }

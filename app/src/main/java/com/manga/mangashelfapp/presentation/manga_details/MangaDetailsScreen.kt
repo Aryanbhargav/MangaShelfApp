@@ -14,13 +14,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -130,13 +135,17 @@ fun BookImageContentView(
     // content
     val context = LocalContext.current
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+            ,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                text = if(mangaListing.isRead) "Mark as Unread : " else "Mark as Read : ",
+                text = if (mangaListing.isRead) "Mark as Unread : " else "Mark as Read : ",
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -144,7 +153,7 @@ fun BookImageContentView(
                 color = Color(0xFFFFC107)
             )
 
-            ReadStatusChip(mangaListing,mangaViewModel)
+            ReadStatusChip(mangaListing, mangaViewModel)
         }
 
         AsyncImage(
@@ -167,8 +176,10 @@ fun BookImageContentView(
             tint = if (mangaListing.isFavourite) Color.Red else Color.White,
             modifier = Modifier
                 .size(60.dp)
-                .clickable(interactionSource = remember { MutableInteractionSource() },
-                    indication = null) {
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
                     mangaViewModel.toggleFavorite(mangaListing)
                 }
         )
@@ -216,6 +227,73 @@ fun BookImageContentView(
             Spacer(modifier = Modifier.height(24.dp))
 
             ChipView(txt = categories)
+        }
+        if (mangaListing.isRead) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                MangaHeading("Recommendations", 22)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            mangaViewModel.getRecommendedList(categories)
+            val recommendedList=mangaViewModel.recommendedManga.collectAsState()
+            recommendedList.value.let {it->
+                LazyRow() {
+                    items(it.size){ i->
+                        val manga=it[i]
+                        RecommendedItem(manga)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(48.dp))
+        }
+    }
+
+}
+
+@Composable
+fun RecommendedItem(manga: MangaListing) {
+    Card(
+        modifier = Modifier
+            .background(Color.Black.copy(alpha = 0.3f))
+            .wrapContentSize()
+            .clip(RoundedCornerShape(20.dp))
+            .padding(8.dp)
+    ) {
+
+        val context = LocalContext.current
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.onSurface)
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                     .data(manga.image)
+                    .crossfade(true)
+                    .placeholder(R.drawable.place_holder)
+                    .error(R.drawable.error_img)
+                    .build(),
+                contentDescription = "Loaded Image",
+                modifier = Modifier
+                    .size(width = 80.dp, height = 165.dp)
+                    .padding(horizontal = 16.dp),
+                contentScale = ContentScale.Inside
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column() {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = manga.title, color = Color.White, maxLines = 2)
+                Text(text = "Score : ${manga.score}", color = Color.White)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Popularity : ${manga.popularity}", color = Color.White)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
         }
     }
 }
