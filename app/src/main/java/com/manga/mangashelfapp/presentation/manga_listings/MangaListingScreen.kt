@@ -19,6 +19,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -107,36 +109,30 @@ fun MangaListingScreen(
 
 
         }
-
+        val sortedMangas = remember {
+            mutableStateOf(state.manga.sortedBy { it.publishedChapterDate }
+            )
+        }
+       LaunchedEffect (key1 =sortingOption.value){
+           sortedMangas.value=when (sortingOption.value) {
+               SortingOption.YEAR -> state.manga.sortedBy { it.publishedChapterDate }
+               SortingOption.SCORE_ASC -> state.manga.sortedBy { it.score }
+               SortingOption.SCORE_DESC -> state.manga.sortedByDescending { it.score }
+               SortingOption.POPULARITY_ASC -> state.manga.sortedBy { it.popularity }
+               SortingOption.POPULARITY_DESC -> state.manga.sortedByDescending { it.popularity }
+           }
+       }
         if (showSheet.value) {
             FilterWithBottomSheet(showSheet, sortingOption)
               if (sortingOption.value == SortingOption.YEAR)
                   YearTabsMangaList(state, navHostController, mangaViewModel)
               else {
-                  val sortedMangas = remember(sortingOption, state.manga) {
-                      when (sortingOption.value) {
-                          SortingOption.YEAR -> state.manga.sortedBy { it.publishedChapterDate }
-                          SortingOption.SCORE_ASC -> state.manga.sortedBy { it.score }
-                          SortingOption.SCORE_DESC -> state.manga.sortedByDescending { it.score }
-                          SortingOption.POPULARITY_ASC -> state.manga.sortedBy { it.popularity }
-                          SortingOption.POPULARITY_DESC -> state.manga.sortedByDescending { it.popularity }
-                      }
-                  }
-               SortBasedMangaList(sortedMangas, navHostController, mangaViewModel)
+               SortBasedMangaList(sortedMangas.value, navHostController, mangaViewModel)
            }
 
         }
         else if(sortingOption.value != SortingOption.YEAR) {
-            val sortedMangas = remember(sortingOption, state.manga) {
-                when (sortingOption.value) {
-                    SortingOption.YEAR -> state.manga.sortedBy { it.publishedChapterDate }
-                    SortingOption.SCORE_ASC -> state.manga.sortedBy { it.score }
-                    SortingOption.SCORE_DESC -> state.manga.sortedByDescending { it.score }
-                    SortingOption.POPULARITY_ASC -> state.manga.sortedBy { it.popularity }
-                    SortingOption.POPULARITY_DESC -> state.manga.sortedByDescending { it.popularity }
-                }
-            }
-            SortBasedMangaList(sortedMangas, navHostController, mangaViewModel)
+            SortBasedMangaList(sortedMangas.value, navHostController, mangaViewModel)
         }else{
             YearTabsMangaList(state, navHostController, mangaViewModel)
         }

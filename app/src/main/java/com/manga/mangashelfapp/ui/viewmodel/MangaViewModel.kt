@@ -108,17 +108,14 @@ class MangaViewModel @Inject constructor(var mangaRepository : MangaRepositoryIm
         viewModelScope.launch {
             val newReadStatus=!manga.isRead
             mangaRepository.updateReadManga(manga.copy(isRead=newReadStatus))
-            val updatedManga=state.manga.map{
-                if(it.id==manga.id){
-                    it.copy(isRead = newReadStatus)
-            }
-                else{
-                    it
-                }
-            }
-            state=state.copy(
+           state.manga=state.manga.toMutableList().onEach {
+           if(it.id==  manga.id){
+               it.copy(isRead = newReadStatus)
+       }
+       }
+            /*state=state.copy(
                 manga=updatedManga
-            )
+            )*/
         }
     }
 
